@@ -3,6 +3,7 @@ package com.ems.employee.entity;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Entity
 public class Employee {
@@ -15,6 +16,7 @@ public class Employee {
 
     private int salary;
 
+    @Enumerated(EnumType.STRING)
     private Role role;
 
     private LocalDate joiningDate;
@@ -32,4 +34,7 @@ public class Employee {
     @ManyToOne
     @JoinColumn(name = "manager_id")
     private Employee manager;
+
+    @OneToMany(mappedBy = "employee")
+    private List<Attendance> attendances;
 }
