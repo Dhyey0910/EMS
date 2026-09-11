@@ -31,6 +31,14 @@ public class Employee {
     @JoinColumn(name = "department_id")
     private Department department;
 
+    public Department getDepartment() {
+        return department;
+    }
+
+    public void setDepartment(Department department) {
+        this.department = department;
+    }
+
     public int getId() {
         return id;
     }

@@ -41,4 +41,12 @@ public class EmployeeController {
         employeeService.deleteEmployeeById(id);
         return;
     }
+
+    @PutMapping("/employees/{employeeId}/department/{departmentId}")
+    public Employee assignDepartment(@PathVariable int employeeId, @PathVariable int departmentId){
+        return employeeService.assignDepartment(employeeId,departmentId);
+    }
+
+
 }
+

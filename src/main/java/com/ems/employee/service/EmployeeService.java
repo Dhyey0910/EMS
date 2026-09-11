@@ -1,6 +1,8 @@
 package com.ems.employee.service;
 
+import com.ems.employee.entity.Department;
 import com.ems.employee.entity.Employee;
+import com.ems.employee.repository.DepartmentRepository;
 import com.ems.employee.repository.EmployeeRepository;
 import org.springframework.stereotype.Service;
 
@@ -12,8 +14,11 @@ public class EmployeeService {
 
     private EmployeeRepository employeeRepository;
 
-    EmployeeService(EmployeeRepository employeeRepository) {
+    private DepartmentRepository departmentRepository;
+
+    EmployeeService(EmployeeRepository employeeRepository,DepartmentRepository departmentRepository) {
         this.employeeRepository = employeeRepository;
+        this.departmentRepository=departmentRepository;
     }
 
     public List<Employee> getAllEmployees(){
@@ -51,5 +56,22 @@ public class EmployeeService {
     public void deleteEmployeeById( int id){
         employeeRepository.deleteById(id);
         return;
+    }
+
+    public Employee assignDepartment(int employeeId, int departmentId){
+        Optional<Employee> employee1 = employeeRepository.findById(employeeId);
+        Optional<Department> department1 = departmentRepository.findById(departmentId);
+
+        if(employee1.isPresent() && department1.isPresent()){
+            Employee employee = employee1.get();
+            Department department = department1.get();
+
+            employee.setDepartment(department);
+
+            return employeeRepository.save(employee);
+        }
+        else{
+            return null;
+        }
     }
 }
