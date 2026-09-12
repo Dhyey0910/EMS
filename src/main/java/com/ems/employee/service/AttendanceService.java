@@ -1,72 +1,115 @@
 package com.ems.employee.service;
 
+import com.ems.employee.dto.attendance.AttendanceRequestDTO;
+import com.ems.employee.dto.attendance.AttendanceResponseDTO;
 import com.ems.employee.entity.Attendance;
 import com.ems.employee.entity.Employee;
+import com.ems.employee.exception.ResourceNotFoundException;
 import com.ems.employee.repository.AttendanceRepository;
 import com.ems.employee.repository.EmployeeRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class AttendanceService {
 
     private AttendanceRepository attendanceRepository;
-
     private EmployeeRepository employeeRepository;
 
-    public AttendanceService(AttendanceRepository attendanceRepository,EmployeeRepository employeeRepository) {
+    public AttendanceService(AttendanceRepository attendanceRepository,
+                             EmployeeRepository employeeRepository) {
         this.attendanceRepository = attendanceRepository;
-        this.employeeRepository  = employeeRepository;
+        this.employeeRepository = employeeRepository;
     }
 
-    public List<Attendance> getAllAttendances(){
-        return attendanceRepository.findAll();
+    public AttendanceResponseDTO createAttendance(AttendanceRequestDTO requestDTO) {
+
+        Attendance attendance = new Attendance();
+
+        attendance.setDate(requestDTO.getDate());
+        attendance.setCheckIn(requestDTO.getCheckIn());
+        attendance.setCheckOut(requestDTO.getCheckOut());
+        attendance.setStatus(requestDTO.getStatus());
+
+        Attendance savedAttendance = attendanceRepository.save(attendance);
+
+        return convertToDTO(savedAttendance);
     }
 
-    public Attendance createAttendance(Attendance attendance){
-        return attendanceRepository.save(attendance);
-    }
+    public List<AttendanceResponseDTO> getAllAttendances() {
 
-    public Attendance assignEmployee(int attendanceId,int employeeId){
-        Optional<Attendance> attendance = attendanceRepository.findById(attendanceId);
-        Optional<Employee> employee = employeeRepository.findById(employeeId);
-        if(employee.isPresent() && attendance.isPresent()){
-            Attendance attendance1 = attendance.get();
-            Employee employee1 = employee.get();
-            attendance1.setEmployee(employee1);
+        List<Attendance> attendances = attendanceRepository.findAll();
+        List<AttendanceResponseDTO> dtos = new ArrayList<>();
 
-            return attendanceRepository.save(attendance1);
+        for (Attendance attendance : attendances) {
+            dtos.add(convertToDTO(attendance));
         }
-        else{
-            return null;
-        }
+
+        return dtos;
     }
 
-    public Optional<Attendance> getAttendanceById(int id){
-        return attendanceRepository.findById(id);
+    public AttendanceResponseDTO getAttendanceById(int id) {
+
+        Attendance attendance = attendanceRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Attendance not found"));
+
+        return convertToDTO(attendance);
     }
 
-    public Attendance updateAttendance(int id, Attendance attendance){
-        Optional<Attendance> attendance1 =  attendanceRepository.findById(id);
+    public AttendanceResponseDTO updateAttendance(
+            int id,
+            AttendanceRequestDTO requestDTO) {
 
-        if(attendance1.isPresent()){
-            Attendance updatedAttendance = attendance1.get();
-            updatedAttendance.setCheckIn(attendance.getCheckIn());
-            updatedAttendance.setCheckOut(attendance.getCheckOut());
-            updatedAttendance.setDate(attendance.getDate());
-            updatedAttendance.setStatus(attendance.getStatus());
+        Attendance existingAttendance = attendanceRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Attendance not found"));
 
-            return attendanceRepository.save(updatedAttendance);
-        }
-        else{
-            return null;
-        }
+        existingAttendance.setDate(requestDTO.getDate());
+        existingAttendance.setCheckIn(requestDTO.getCheckIn());
+        existingAttendance.setCheckOut(requestDTO.getCheckOut());
+        existingAttendance.setStatus(requestDTO.getStatus());
+
+        Attendance updatedAttendance = attendanceRepository.save(existingAttendance);
+
+        return convertToDTO(updatedAttendance);
     }
 
-    public void deleteAttendanceById(int id){
+    public void deleteAttendanceById(int id) {
+
+        attendanceRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Attendance not found"));
+
         attendanceRepository.deleteById(id);
-        return;
+    }
+
+    public AttendanceResponseDTO assignEmployee(
+            int attendanceId,
+            int employeeId) {
+
+        Attendance attendance = attendanceRepository.findById(attendanceId)
+                .orElseThrow(() -> new ResourceNotFoundException("Attendance not found"));
+
+        Employee employee = employeeRepository.findById(employeeId)
+                .orElseThrow(() -> new ResourceNotFoundException("Employee not found"));
+
+        attendance.setEmployee(employee);
+
+        Attendance updatedAttendance = attendanceRepository.save(attendance);
+
+        return convertToDTO(updatedAttendance);
+    }
+
+    public AttendanceResponseDTO convertToDTO(Attendance attendance) {
+
+        AttendanceResponseDTO dto = new AttendanceResponseDTO();
+
+        dto.setId(attendance.getId());
+        dto.setDate(attendance.getDate());
+        dto.setCheckIn(attendance.getCheckIn());
+        dto.setCheckOut(attendance.getCheckOut());
+        dto.setStatus(attendance.getStatus());
+
+        return dto;
     }
 }

@@ -1,11 +1,12 @@
 package com.ems.employee.controller;
 
-import com.ems.employee.entity.Attendance;
+import com.ems.employee.dto.attendance.AttendanceRequestDTO;
+import com.ems.employee.dto.attendance.AttendanceResponseDTO;
 import com.ems.employee.service.AttendanceService;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 public class AttendanceController {
@@ -17,32 +18,40 @@ public class AttendanceController {
     }
 
     @GetMapping("/attendances")
-    public List<Attendance> getAllAttendances(){
+    public List<AttendanceResponseDTO> getAllAttendances() {
         return attendanceService.getAllAttendances();
     }
 
     @PostMapping("/attendances")
-    public Attendance createAttendance(@RequestBody Attendance attendance){
-        return attendanceService.createAttendance(attendance);
-    }
+    public AttendanceResponseDTO createAttendance(
+            @Valid @RequestBody AttendanceRequestDTO requestDTO) {
 
-    @PutMapping("/attendances/{attendanceId}/employee/{employeeId}")
-    public Attendance assignEmployee(@PathVariable int employeeId,@PathVariable int attendanceId){
-        return attendanceService.assignEmployee(attendanceId,employeeId);
+        return attendanceService.createAttendance(requestDTO);
     }
 
     @GetMapping("/attendances/{id}")
-    public Optional<Attendance> getAttendanceById(@PathVariable int id){
+    public AttendanceResponseDTO getAttendanceById(@PathVariable int id) {
         return attendanceService.getAttendanceById(id);
     }
 
     @PutMapping("/attendances/{id}")
-    public Attendance updateAttendance(@PathVariable int id, @RequestBody Attendance attendance){
-        return attendanceService.updateAttendance(id,attendance);
+    public AttendanceResponseDTO updateAttendance(
+            @PathVariable int id,
+            @Valid @RequestBody AttendanceRequestDTO requestDTO) {
+
+        return attendanceService.updateAttendance(id, requestDTO);
+    }
+
+    @PutMapping("/attendances/{attendanceId}/employee/{employeeId}")
+    public AttendanceResponseDTO assignEmployee(
+            @PathVariable int attendanceId,
+            @PathVariable int employeeId) {
+
+        return attendanceService.assignEmployee(attendanceId, employeeId);
     }
 
     @DeleteMapping("/attendances/{id}")
-    public void deleteAttendanceById(@PathVariable int id){
+    public void deleteAttendanceById(@PathVariable int id) {
         attendanceService.deleteAttendanceById(id);
     }
 }

@@ -1,13 +1,16 @@
 package com.ems.employee.service;
 
+import com.ems.employee.dto.leave.LeaveRequestRequestDTO;
+import com.ems.employee.dto.leave.LeaveRequestResponseDTO;
 import com.ems.employee.entity.Employee;
 import com.ems.employee.entity.LeaveRequest;
+import com.ems.employee.exception.ResourceNotFoundException;
 import com.ems.employee.repository.EmployeeRepository;
 import com.ems.employee.repository.LeaveRequestRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class LeaveRequestService {
@@ -21,55 +24,106 @@ public class LeaveRequestService {
         this.employeeRepository = employeeRepository;
     }
 
-    public List<LeaveRequest> getAllLeaveRequests() {
-        return leaveRequestRepository.findAll();
-    }
+    public List<LeaveRequestResponseDTO> getAllLeaveRequests() {
 
-    public LeaveRequest createLeaveRequest(LeaveRequest leaveRequest) {
-        return leaveRequestRepository.save(leaveRequest);
-    }
+        List<LeaveRequest> leaveRequests = leaveRequestRepository.findAll();
 
-    public Optional<LeaveRequest> getLeaveRequestById(int id) {
-        return leaveRequestRepository.findById(id);
-    }
+        List<LeaveRequestResponseDTO> dtos = new ArrayList<>();
 
-    public LeaveRequest updateLeaveRequest(int id, LeaveRequest leaveRequest) {
-        Optional<LeaveRequest> leaveRequest1 = leaveRequestRepository.findById(id);
-
-        if (leaveRequest1.isPresent()) {
-            LeaveRequest existingLeaveRequest = leaveRequest1.get();
-
-            existingLeaveRequest.setStartDate(leaveRequest.getStartDate());
-            existingLeaveRequest.setEndDate(leaveRequest.getEndDate());
-            existingLeaveRequest.setStatus(leaveRequest.getStatus());
-            existingLeaveRequest.setReason(leaveRequest.getReason());
-
-            return leaveRequestRepository.save(existingLeaveRequest);
-        } else {
-            return null;
+        for (LeaveRequest leaveRequest : leaveRequests) {
+            dtos.add(convertToDTO(leaveRequest));
         }
+
+        return dtos;
     }
 
-    public LeaveRequest assignEmployee(int leaveRequestId, int employeeId) {
-        Optional<LeaveRequest> leaveRequest1 =
-                leaveRequestRepository.findById(leaveRequestId);
+    public LeaveRequestResponseDTO createLeaveRequest(
+            LeaveRequestRequestDTO requestDTO) {
 
-        Optional<Employee> employee1 =
-                employeeRepository.findById(employeeId);
+        LeaveRequest leaveRequest = new LeaveRequest();
 
-        if (leaveRequest1.isPresent() && employee1.isPresent()) {
-            LeaveRequest leaveRequest = leaveRequest1.get();
-            Employee employee = employee1.get();
+        leaveRequest.setStartDate(requestDTO.getStartDate());
+        leaveRequest.setEndDate(requestDTO.getEndDate());
+        leaveRequest.setStatus(requestDTO.getStatus());
+        leaveRequest.setReason(requestDTO.getReason());
 
-            leaveRequest.setEmployee(employee);
+        LeaveRequest savedLeaveRequest =
+                leaveRequestRepository.save(leaveRequest);
 
-            return leaveRequestRepository.save(leaveRequest);
-        } else {
-            return null;
-        }
+        return convertToDTO(savedLeaveRequest);
+    }
+
+    public LeaveRequestResponseDTO getLeaveRequestById(int id) {
+
+        LeaveRequest leaveRequest = leaveRequestRepository.findById(id)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Leave request not found"));
+
+        return convertToDTO(leaveRequest);
+    }
+
+    public LeaveRequestResponseDTO updateLeaveRequest(
+            int id,
+            LeaveRequestRequestDTO requestDTO) {
+
+        LeaveRequest existingLeaveRequest =
+                leaveRequestRepository.findById(id)
+                        .orElseThrow(() ->
+                                new ResourceNotFoundException("Leave request not found"));
+
+        existingLeaveRequest.setStartDate(requestDTO.getStartDate());
+        existingLeaveRequest.setEndDate(requestDTO.getEndDate());
+        existingLeaveRequest.setStatus(requestDTO.getStatus());
+        existingLeaveRequest.setReason(requestDTO.getReason());
+
+        LeaveRequest updatedLeaveRequest =
+                leaveRequestRepository.save(existingLeaveRequest);
+
+        return convertToDTO(updatedLeaveRequest);
     }
 
     public void deleteLeaveRequestById(int id) {
+
+        leaveRequestRepository.findById(id)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Leave request not found"));
+
         leaveRequestRepository.deleteById(id);
+    }
+
+    public LeaveRequestResponseDTO assignEmployee(
+            int leaveRequestId,
+            int employeeId) {
+
+        LeaveRequest leaveRequest =
+                leaveRequestRepository.findById(leaveRequestId)
+                        .orElseThrow(() ->
+                                new ResourceNotFoundException("Leave request not found"));
+
+        Employee employee =
+                employeeRepository.findById(employeeId)
+                        .orElseThrow(() ->
+                                new ResourceNotFoundException("Employee not found"));
+
+        leaveRequest.setEmployee(employee);
+
+        LeaveRequest updatedLeaveRequest =
+                leaveRequestRepository.save(leaveRequest);
+
+        return convertToDTO(updatedLeaveRequest);
+    }
+
+    public LeaveRequestResponseDTO convertToDTO(
+            LeaveRequest leaveRequest) {
+
+        LeaveRequestResponseDTO dto = new LeaveRequestResponseDTO();
+
+        dto.setId(leaveRequest.getId());
+        dto.setStartDate(leaveRequest.getStartDate());
+        dto.setEndDate(leaveRequest.getEndDate());
+        dto.setStatus(leaveRequest.getStatus());
+        dto.setReason(leaveRequest.getReason());
+
+        return dto;
     }
 }

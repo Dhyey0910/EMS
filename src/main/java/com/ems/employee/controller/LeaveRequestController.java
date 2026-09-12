@@ -1,11 +1,12 @@
 package com.ems.employee.controller;
 
-import com.ems.employee.entity.LeaveRequest;
+import com.ems.employee.dto.leave.LeaveRequestRequestDTO;
+import com.ems.employee.dto.leave.LeaveRequestResponseDTO;
 import com.ems.employee.service.LeaveRequestService;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 public class LeaveRequestController {
@@ -17,30 +18,39 @@ public class LeaveRequestController {
     }
 
     @GetMapping("/leave-requests")
-    public List<LeaveRequest> getAllLeaveRequests() {
+    public List<LeaveRequestResponseDTO> getAllLeaveRequests() {
         return leaveRequestService.getAllLeaveRequests();
     }
 
     @PostMapping("/leave-requests")
-    public LeaveRequest createLeaveRequest(@RequestBody LeaveRequest leaveRequest) {
-        return leaveRequestService.createLeaveRequest(leaveRequest);
+    public LeaveRequestResponseDTO createLeaveRequest(
+            @Valid @RequestBody LeaveRequestRequestDTO requestDTO) {
+
+        return leaveRequestService.createLeaveRequest(requestDTO);
     }
 
     @GetMapping("/leave-requests/{id}")
-    public Optional<LeaveRequest> getLeaveRequestById(@PathVariable int id) {
+    public LeaveRequestResponseDTO getLeaveRequestById(
+            @PathVariable int id) {
+
         return leaveRequestService.getLeaveRequestById(id);
     }
 
     @PutMapping("/leave-requests/{id}")
-    public LeaveRequest updateLeaveRequest(@PathVariable int id,
-                                           @RequestBody LeaveRequest leaveRequest) {
-        return leaveRequestService.updateLeaveRequest(id, leaveRequest);
+    public LeaveRequestResponseDTO updateLeaveRequest(
+            @PathVariable int id,
+            @Valid @RequestBody LeaveRequestRequestDTO requestDTO) {
+
+        return leaveRequestService.updateLeaveRequest(id, requestDTO);
     }
 
     @PutMapping("/leave-requests/{leaveRequestId}/employee/{employeeId}")
-    public LeaveRequest assignEmployee(@PathVariable int leaveRequestId,
-                                       @PathVariable int employeeId) {
-        return leaveRequestService.assignEmployee(leaveRequestId, employeeId);
+    public LeaveRequestResponseDTO assignEmployee(
+            @PathVariable int leaveRequestId,
+            @PathVariable int employeeId) {
+
+        return leaveRequestService.assignEmployee(
+                leaveRequestId, employeeId);
     }
 
     @DeleteMapping("/leave-requests/{id}")

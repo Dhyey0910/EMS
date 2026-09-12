@@ -1,19 +1,13 @@
-package com.ems.employee.entity;
+package com.ems.employee.dto.employee;
 
-import jakarta.persistence.*;
+import com.ems.employee.entity.Role;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
 
 import java.time.LocalDate;
-import java.util.List;
 
-@Entity
-public class Employee {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+public class EmployeeRequestDTO {
 
     @NotBlank
     private String name;
@@ -21,7 +15,6 @@ public class Employee {
     @Positive
     private int salary;
 
-    @Enumerated(EnumType.STRING)
     private Role role;
 
     private LocalDate joiningDate;
@@ -32,26 +25,6 @@ public class Employee {
     private String email;
 
     private String password;
-
-    @ManyToOne
-    @JoinColumn(name = "department_id")
-    private Department department;
-
-    public Department getDepartment() {
-        return department;
-    }
-
-    public void setDepartment(Department department) {
-        this.department = department;
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
 
     public String getName() {
         return name;
@@ -107,28 +80,5 @@ public class Employee {
 
     public void setPassword(String password) {
         this.password = password;
-    }
-
-    @ManyToOne
-    @JoinColumn(name = "manager_id")
-    private Employee manager;
-
-    @OneToMany(mappedBy = "employee")
-    private List<Attendance> attendances;
-
-    public Employee getManager() {
-        return manager;
-    }
-
-    public void setManager(Employee manager) {
-        this.manager = manager;
-    }
-
-    public List<Attendance> getAttendances() {
-        return attendances;
-    }
-
-    public void setAttendances(List<Attendance> attendances) {
-        this.attendances = attendances;
     }
 }
