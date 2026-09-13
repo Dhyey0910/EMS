@@ -2,7 +2,6 @@ package com.ems.employee.controller;
 
 import com.ems.employee.dto.employee.EmployeeRequestDTO;
 import com.ems.employee.dto.employee.EmployeeResponseDTO;
-import com.ems.employee.entity.Employee;
 import com.ems.employee.service.EmployeeService;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
@@ -14,7 +13,7 @@ public class EmployeeController {
 
     private EmployeeService employeeService;
 
-    public EmployeeController(EmployeeService employeeService){
+    public EmployeeController(EmployeeService employeeService) {
         this.employeeService = employeeService;
     }
 
@@ -32,8 +31,7 @@ public class EmployeeController {
 
     @GetMapping("/employees/{id}")
     public EmployeeResponseDTO getEmployeeById(@PathVariable int id) {
-        Employee employee = employeeService.getEmployeeById(id);
-        return employeeService.convertToDTO(employee);
+        return employeeService.getEmployeeById(id);
     }
 
     @PutMapping("/employees/{id}")
@@ -45,19 +43,23 @@ public class EmployeeController {
     }
 
     @DeleteMapping("/employees/{id}")
-    public void deleteEmployeeById(@PathVariable int id){
+    public void deleteEmployeeById(@PathVariable int id) {
         employeeService.deleteEmployeeById(id);
-        return;
     }
 
     @PutMapping("/employees/{employeeId}/department/{departmentId}")
-    public Employee assignDepartment(@PathVariable int employeeId, @PathVariable int departmentId){
-        return employeeService.assignDepartment(employeeId,departmentId);
+    public EmployeeResponseDTO assignDepartment(
+            @PathVariable int employeeId,
+            @PathVariable int departmentId) {
+
+        return employeeService.assignDepartment(employeeId, departmentId);
     }
 
     @PutMapping("/employees/{employeeId}/manager/{managerId}")
-    public Employee assignManager(@PathVariable int employeeId, @PathVariable int managerId){
-        return employeeService.assignManager(employeeId,managerId);
+    public EmployeeResponseDTO assignManager(
+            @PathVariable int employeeId,
+            @PathVariable int managerId) {
+
+        return employeeService.assignManager(employeeId, managerId);
     }
 }
-

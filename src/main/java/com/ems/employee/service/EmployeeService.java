@@ -11,20 +11,19 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class EmployeeService {
 
     private EmployeeRepository employeeRepository;
-
     private DepartmentRepository departmentRepository;
 
-    EmployeeService(EmployeeRepository employeeRepository,DepartmentRepository departmentRepository) {
+    EmployeeService(EmployeeRepository employeeRepository,
+                    DepartmentRepository departmentRepository) {
         this.employeeRepository = employeeRepository;
-        this.departmentRepository=departmentRepository;
+        this.departmentRepository = departmentRepository;
     }
-    
+
     public EmployeeResponseDTO createEmployee(EmployeeRequestDTO employeeRequestDTO) {
 
         Employee employee = new Employee();
@@ -42,12 +41,17 @@ public class EmployeeService {
         return convertToDTO(savedEmployee);
     }
 
-    public Employee getEmployeeById(int id){
-        return employeeRepository.findById(id)
+    public EmployeeResponseDTO getEmployeeById(int id) {
+
+        Employee employee = employeeRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Employee not found"));
+
+        return convertToDTO(employee);
     }
 
-    public EmployeeResponseDTO updateEmployee(int id, EmployeeRequestDTO employeeRequestDTO) {
+    public EmployeeResponseDTO updateEmployee(
+            int id,
+            EmployeeRequestDTO employeeRequestDTO) {
 
         Employee existingEmployee = employeeRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Employee not found"));
@@ -73,7 +77,8 @@ public class EmployeeService {
         employeeRepository.deleteById(id);
     }
 
-    public Employee assignDepartment(int employeeId, int departmentId) {
+    public EmployeeResponseDTO assignDepartment(int employeeId, int departmentId) {
+
         Employee employee = employeeRepository.findById(employeeId)
                 .orElseThrow(() -> new ResourceNotFoundException("Employee not found"));
 
@@ -82,10 +87,13 @@ public class EmployeeService {
 
         employee.setDepartment(department);
 
-        return employeeRepository.save(employee);
+        Employee updatedEmployee = employeeRepository.save(employee);
+
+        return convertToDTO(updatedEmployee);
     }
 
-    public Employee assignManager(int employeeId, int managerId) {
+    public EmployeeResponseDTO assignManager(int employeeId, int managerId) {
+
         Employee employee = employeeRepository.findById(employeeId)
                 .orElseThrow(() -> new ResourceNotFoundException("Employee not found"));
 
@@ -93,7 +101,10 @@ public class EmployeeService {
                 .orElseThrow(() -> new ResourceNotFoundException("Manager not found"));
 
         employee.setManager(manager);
-        return employeeRepository.save(employee);
+
+        Employee updatedEmployee = employeeRepository.save(employee);
+
+        return convertToDTO(updatedEmployee);
     }
 
     public EmployeeResponseDTO convertToDTO(Employee employee) {
@@ -114,10 +125,13 @@ public class EmployeeService {
     public List<EmployeeResponseDTO> getAllEmployeeDTOs() {
 
         List<Employee> employees = employeeRepository.findAll();
+
         List<EmployeeResponseDTO> dtos = new ArrayList<>();
+
         for (Employee employee : employees) {
             dtos.add(convertToDTO(employee));
         }
+
         return dtos;
     }
 }
