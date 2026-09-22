@@ -7,6 +7,7 @@ import com.ems.employee.entity.Employee;
 import com.ems.employee.exception.ResourceNotFoundException;
 import com.ems.employee.repository.DepartmentRepository;
 import com.ems.employee.repository.EmployeeRepository;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -17,11 +18,15 @@ public class EmployeeService {
 
     private EmployeeRepository employeeRepository;
     private DepartmentRepository departmentRepository;
+    private PasswordEncoder passwordEncoder;
 
     EmployeeService(EmployeeRepository employeeRepository,
-                    DepartmentRepository departmentRepository) {
+                    DepartmentRepository departmentRepository,
+                    PasswordEncoder passwordEncoder) {
+
         this.employeeRepository = employeeRepository;
         this.departmentRepository = departmentRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public EmployeeResponseDTO createEmployee(EmployeeRequestDTO employeeRequestDTO) {
@@ -34,7 +39,7 @@ public class EmployeeService {
         employee.setJoiningDate(employeeRequestDTO.getJoiningDate());
         employee.setPhoneNumber(employeeRequestDTO.getPhoneNumber());
         employee.setEmail(employeeRequestDTO.getEmail());
-        employee.setPassword(employeeRequestDTO.getPassword());
+        employee.setPassword(passwordEncoder.encode(employeeRequestDTO.getPassword()));
 
         Employee savedEmployee = employeeRepository.save(employee);
 
@@ -62,7 +67,7 @@ public class EmployeeService {
         existingEmployee.setJoiningDate(employeeRequestDTO.getJoiningDate());
         existingEmployee.setPhoneNumber(employeeRequestDTO.getPhoneNumber());
         existingEmployee.setEmail(employeeRequestDTO.getEmail());
-        existingEmployee.setPassword(employeeRequestDTO.getPassword());
+        existingEmployee.setPassword(passwordEncoder.encode(employeeRequestDTO.getPassword()));
 
         Employee updatedEmployee = employeeRepository.save(existingEmployee);
 
